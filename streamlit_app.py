@@ -263,7 +263,7 @@ with tab1:
                 if contrato_seleccionado == "Automático":
                     if area_seleccionada == "Proyectos BT":
                         if distrito in ["LOS OLIVOS", "COMAS"]:
-                            contrato_id = "5200000072"
+                            contrato_id = "5200000077"
                         elif "COLONIAL" in org_mantenimiento:
                             contrato_id = "5200000075"
                         elif "PANAMERICANA" in org_mantenimiento:
@@ -271,7 +271,7 @@ with tab1:
                         else:
                             contrato_id = "" 
                     elif area_seleccionada == "Proyectos MT/BT":
-                        contrato_id = "5200000072"
+                        contrato_id = "5200000077"
                     else:
                         contrato_id = ""
                 elif contrato_seleccionado == "Applus Colonial":
@@ -279,7 +279,7 @@ with tab1:
                 elif contrato_seleccionado == "Applus Panamericana":
                     contrato_id = "5200000102"
                 elif contrato_seleccionado == "Satel":
-                    contrato_id = "5200000072"
+                    contrato_id = "5200000077"
                 else:
                     contrato_id = ""
 
