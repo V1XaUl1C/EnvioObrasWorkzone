@@ -271,7 +271,7 @@ with tab1:
                         else:
                             contrato_id = "" 
                     elif area_seleccionada == "Proyectos MT/BT":
-                        contrato_id = "5200000075"
+                        contrato_id = "5200000072"
                     else:
                         contrato_id = ""
                 elif contrato_seleccionado == "Applus Colonial":
