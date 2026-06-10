@@ -156,7 +156,6 @@ def procesar_word(ruta, viejo, nuevo):
     doc.save(ruta)
 
 def procesar_excel_automatico(ruta_absoluta, viejo, nuevo):
-    # ¡NUEVA LÓGICA! 100% precisa: revisa todas las hojas y celdas. Compatible con Streamlit Cloud.
     try:
         wb = openpyxl.load_workbook(ruta_absoluta)
         for ws in wb.worksheets:
@@ -211,8 +210,7 @@ def procesar_pdf(ruta, viejo, nuevo):
 
         for rect, tamano_fuente, color_fuente in spans_formato:
             punto_insercion = fitz.Point(rect.x0, rect.y1 - (rect.height*0.15))
-            pagina.insert_text(punto_insercion, nuevo, fontsize=tamano_fuente,
-                               color=color_fuente, fontname="helv")
+            pagina.insert_text(punto_insercion, nuevo, fontsize=tamano_fuente, color=color_fuente, fontname="helv")
 
     ruta_temp = ruta+".tmp"
     doc.save(ruta_temp, incremental=False, encryption=0)
@@ -232,6 +230,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # --- SECCIÓN 1: Plantilla ODM ING ---
 with tab1:
     st.subheader("Generación de Plantilla ODM ING")
+
     if df_guia is not None:
         col_input1, col_input2, col_input3 = st.columns(3)
         with col_input1:
@@ -242,6 +241,13 @@ with tab1:
             codigo_seleccionado = st.selectbox("2. Selecciona Código Interno", options=[""] + lista_codigos)
         with col_input3:
             tension_seleccionada = st.selectbox("3. Selecciona Nivel de Tensión", options=["", "BT", "MT"])
+        
+        # --- MODIFICACIÓN: Nuevos inputs Área y Contrato ---
+        col_input4, col_input5, _ = st.columns([1, 1, 1])
+        with col_input4:
+            area_seleccionada = st.selectbox("4. Área", options=["Proyectos BT", "Proyectos MT/BT"])
+        with col_input5:
+            contrato_seleccionado = st.selectbox("5. Contrato", options=["Automático", "Applus Colonial", "Applus Panamericana", "Satel"])
         st.markdown("---")
         
         if st.button("🚀 Generar Plantilla Excel"):
@@ -251,8 +257,32 @@ with tab1:
                 fila_sed = df_guia[df_guia['SED'] == sed_seleccionada].iloc[0]
                 alim = str(fila_sed.get('ALIM', '')).strip()
                 org_mantenimiento = str(fila_sed.get('ORGANIZACIÓN MANTENIMIENTO', '')).strip().upper()
+                distrito = str(fila_sed.get('DISTRITO', '')).strip().upper()
                 
-                contrato_id = "5200000075" if "COLONIAL" in org_mantenimiento else ("5200000102" if "PANAMERICANA" in org_mantenimiento else "")
+                # --- LÓGICA DE SELECCIÓN DE CONTRATO ---
+                if contrato_seleccionado == "Automático":
+                    if area_seleccionada == "Proyectos BT":
+                        if distrito in ["LOS OLIVOS", "COMAS"]:
+                            contrato_id = "5200000072"
+                        elif "COLONIAL" in org_mantenimiento:
+                            contrato_id = "5200000075"
+                        elif "PANAMERICANA" in org_mantenimiento:
+                            contrato_id = "5200000102"
+                        else:
+                            contrato_id = "" 
+                    elif area_seleccionada == "Proyectos MT/BT":
+                        contrato_id = "5200000075"
+                    else:
+                        contrato_id = ""
+                elif contrato_seleccionado == "Applus Colonial":
+                    contrato_id = "5200000075"
+                elif contrato_seleccionado == "Applus Panamericana":
+                    contrato_id = "5200000102"
+                elif contrato_seleccionado == "Satel":
+                    contrato_id = "5200000072"
+                else:
+                    contrato_id = ""
+
                 zona_id = "A" if "COLONIAL" in org_mantenimiento else ("B" if "PANAMERICANA" in org_mantenimiento else "")
                 fecha_reserva = datetime.now().strftime("%d.%m.%Y")
                 emplazamiento = f"M-{alim}"
@@ -316,7 +346,7 @@ with tab2:
                 for fila in filas:
                     cols = [str(c).strip() for c in fila]
                     if not any(cols): continue
-                        
+                    
                     if "Agrup.Prot.AGP" in cols:
                         idx_agp = cols.index("Agrup.Prot.AGP")
                         idx_cit = cols.index("CIT") if "CIT" in cols else min(3, len(cols)-1)
@@ -328,7 +358,7 @@ with tab2:
                         idx_mat = cols.index("Mat./Prest.")
                         idx_cant = cols.index("Cantidad") if "Cantidad" in cols else -1
                         continue
-                        
+                    
                     if idx_agp != -1 and idx_cit != -1 and len(cols) > max(idx_agp, idx_cit):
                         val_agp, val_cit = cols[idx_agp], cols[idx_cit]
                         if val_agp and val_cit and val_agp != "Agrup.Prot.AGP" and "IMPORTE" not in val_agp.upper():
@@ -382,10 +412,17 @@ with tab2:
             mask = df_peps[5].astype(str).str.strip() == str(fb_finalidad).strip()
             peps_validos = df_peps[mask][1].astype(str).str.strip().dropna().unique().tolist()
             peps_validos = [p for p in peps_validos if p and p.lower() != 'nan']
+            
+            peps_h3 = df_peps[df_peps[5].astype(str).str.strip() == "H3"][1].astype(str).str.strip().dropna().unique().tolist()
+            peps_especiales = [p for p in peps_h3 if p in ["RAAP", "RSAP"]]
+            for especial in peps_especiales:
+                if especial not in peps_validos:
+                    peps_validos.append(especial)
 
         for agp in agrupadores_unicos:
             if agp not in lista_cx:
-                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agp)) & (df_peps[5].astype(str).str.strip() == str(fb_finalidad))]
+                fb_check = "H3" if agp in ["RAAP", "RSAP"] else fb_finalidad
+                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agp)) & (df_peps[5].astype(str).str.strip() == str(fb_check))]
                 if filtro_pep.empty:
                     agrupadores_con_vacios.append(agp)
 
@@ -394,12 +431,15 @@ with tab2:
             st.error("⚠️ Atención: Identificamos Agrupadores que dejarán Sección y Parte vacíos. Por favor, selecciona el correcto:")
             cols_map = st.columns(3)
             for i, agp_vacio in enumerate(agrupadores_con_vacios):
-                opciones = ["(Dejar vacío)"] + peps_validos
+                opciones_combinadas = lista_cx + peps_validos
+                opciones = ["(Dejar vacío)"] + opciones_combinadas
+                
                 sugerencia_idx = 0
-                for j, v_pep in enumerate(peps_validos):
-                    if agp_vacio.startswith(v_pep) or v_pep.startswith(agp_vacio[:4]):
+                for j, opcion_valida in enumerate(opciones_combinadas):
+                    if agp_vacio.startswith(opcion_valida) or opcion_valida.startswith(agp_vacio[:4]):
                         sugerencia_idx = j + 1
                         break
+                
                 with cols_map[i % 3]:
                     seleccion = st.selectbox(f"Corregir '{agp_vacio}' por:", options=opciones, index=sugerencia_idx, key=f"corrige_vas_{agp_vacio}")
                     if seleccion != "(Dejar vacío)": mapeo_usuario[agp_vacio] = seleccion
@@ -436,19 +476,47 @@ with tab2:
                 descripcion = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'DESCRIPCION DEL PEP')
             else:
                 tension = "MT" if str(agrupador_busqueda).startswith(("SE", "RADP", "RSDP")) else "BT"
-                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_finalidad))]
+                # Provisional fb para buscar descripcion correcta
+                fb_temp = "H3" if agrupador_busqueda in ["RAAP", "RSAP"] else fb_finalidad
+                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_temp))]
                 if not filtro_pep.empty:
                     seccion, parte = filtro_pep.iloc[0][18], filtro_pep.iloc[0][20]   
                 match_desc = df_peps[df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)]
                 if not match_desc.empty: descripcion = match_desc.iloc[0][21]
 
+            # --- LÓGICA DE DEFINICIÓN DE CÓDIGO (RAAP/RSAP y DS11) ---
+            pry_str = str(params['pry']).strip().upper()
+            if agrupador_busqueda in ["RAAP", "RSAP"]:
+                fb_row = "H3"
+                codigos_especiales = ["DD002", "DD003", "DD004", "DD005", "DD006", "DD007"]
+                codigo_row = "AP100" if pry_str in codigos_especiales else "AP053"
+            else:
+                fb_row = fb_finalidad
+                if pry_str.startswith("DS11"):
+                    desc_upper = str(descripcion).upper()
+                    if str(agrupador_busqueda).upper().startswith("SE"):
+                        codigo_row = "DS113"
+                    elif "MT" in desc_upper:
+                        codigo_row = "DS112"
+                    elif "BT" in desc_upper:
+                        codigo_row = "DS111"
+                    else:
+                        codigo_row = pry_str
+                else:
+                    codigo_row = pry_str
+
             fila_excel = {
-                "POSICION_NUMERO": i + 1, "GRUPO_PRESUPUESTO": agrupador_original, "POSICION_TIPO": posicion_tipo,
+                "POSICION_NUMERO": i + 1, 
+                "GRUPO_PRESUPUESTO": agrupador_busqueda,
+                "POSICION_TIPO": posicion_tipo,
                 "OPERACION_NUMERO": 10, "CONTRATO_ID": contrato_final, "CONTRATO_POSICION": "", "MATERIAL": mat_final,
                 "MATERIAL_UNIDAD_MEDIDA": "", "MATERIAL_COSTO_UNITARIO": "", "MATERIAL_CANTIDAD": cantidad, "MATERIAL_COSTO_TOTAL": "",
                 "FECHA_RESERVA": fecha_reserva_final, "EMPLAZAMIENTO": emplazamiento_final, "PROY_INSPECTOR_USUARIO": "", "TENSION_NIVEL": tension,
-                "PROY_TIPOLOGIA_ID": params['tipologia'], "SECCION": seccion, "PROY_PARTE_ID": parte, "CODIGO_INTERNO": params['pry'],
-                "PROY_ZONA_ID": zona_final, "PRESUPUESTO_FINALIDAD": fb_finalidad, "ELEMENTO_PEP": "", "ODM_PRESUPUESTO": "", "ODM_PRESPTO_DESCRIPCION": descripcion, "TAM": ""
+                "PROY_TIPOLOGIA_ID": params['tipologia'], "SECCION": seccion, "PROY_PARTE_ID": parte, 
+                "CODIGO_INTERNO": codigo_row,
+                "PROY_ZONA_ID": zona_final, 
+                "PRESUPUESTO_FINALIDAD": fb_row,
+                "ELEMENTO_PEP": "", "ODM_PRESUPUESTO": "", "ODM_PRESPTO_DESCRIPCION": descripcion, "TAM": ""
             }
             datos_finales.append(fila_excel)
 
@@ -495,7 +563,7 @@ with tab3:
                 col_cant = cols_dict.get("cantidad")
 
                 if not (col_agp and col_tipo and col_mat and col_cant):
-                    st.error(f"❌ El archivo no tiene las columnas correctas.")
+                   st.error(f"❌ El archivo no tiene las columnas correctas.")
                 else:
                     distrito_ot = get_val(df_guia, 'SED', sed_ot, 'DISTRITO')
                     bloque_mat, bloque_serv, bloque_esp = [], [], []
@@ -510,6 +578,7 @@ with tab3:
                         if not agrupador or agrupador == "nan": continue
                             
                         if matricula.endswith('.0'): matricula = matricula[:-2]
+                        
                         if tipo == "Servicios" and len(matricula) >= 3 and not matricula.startswith("TLA"): 
                             matricula = "TLA" + matricula[3:]
                             
@@ -532,7 +601,7 @@ with tab3:
 
                     st.session_state['datos_ot'] = bloque_mat + bloque_serv + bloque_esp
                     st.session_state['params_ot'] = {
-                        "sed": sed_ot, "pry": cod_pry_ot, "plazo": plazo_ot, "tipologia": tipologia_ot, "distrito": distrito_ot
+                       "sed": sed_ot, "pry": cod_pry_ot, "plazo": plazo_ot, "tipologia": tipologia_ot, "distrito": distrito_ot
                     }
             except Exception as e:
                 st.error(f"❌ Error leyendo el archivo OT: {e}")
@@ -549,10 +618,17 @@ with tab3:
             mask = df_peps[5].astype(str).str.strip() == str(fb_finalidad).strip()
             peps_validos = df_peps[mask][1].astype(str).str.strip().dropna().unique().tolist()
             peps_validos = [p for p in peps_validos if p and p.lower() != 'nan']
+            
+            peps_h3 = df_peps[df_peps[5].astype(str).str.strip() == "H3"][1].astype(str).str.strip().dropna().unique().tolist()
+            peps_especiales = [p for p in peps_h3 if p in ["RAAP", "RSAP"]]
+            for especial in peps_especiales:
+                if especial not in peps_validos:
+                    peps_validos.append(especial)
 
         for agp in agrupadores_unicos:
             if agp not in lista_cx:
-                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agp)) & (df_peps[5].astype(str).str.strip() == str(fb_finalidad))]
+                fb_check = "H3" if agp in ["RAAP", "RSAP"] else fb_finalidad
+                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agp)) & (df_peps[5].astype(str).str.strip() == str(fb_check))]
                 if filtro_pep.empty:
                     agrupadores_con_vacios.append(agp)
 
@@ -561,12 +637,15 @@ with tab3:
             st.error("⚠️ Atención: Identificamos Agrupadores que dejarán Sección y Parte vacíos. Por favor, selecciona el correcto:")
             cols_map = st.columns(3)
             for i, agp_vacio in enumerate(agrupadores_con_vacios):
-                opciones = ["(Dejar vacío)"] + peps_validos
+                opciones_combinadas_ot = lista_cx + peps_validos
+                opciones = ["(Dejar vacío)"] + opciones_combinadas_ot
+                
                 sugerencia_idx = 0
-                for j, v_pep in enumerate(peps_validos):
-                    if agp_vacio.startswith(v_pep) or v_pep.startswith(agp_vacio[:4]):
+                for j, opcion_valida in enumerate(opciones_combinadas_ot):
+                    if agp_vacio.startswith(opcion_valida) or opcion_valida.startswith(agp_vacio[:4]):
                         sugerencia_idx = j + 1
                         break
+                
                 with cols_map[i % 3]:
                     seleccion = st.selectbox(f"Corregir '{agp_vacio}' por:", options=opciones, index=sugerencia_idx, key=f"corrige_ot_{agp_vacio}")
                     if seleccion != "(Dejar vacío)": mapeo_usuario_ot[agp_vacio] = seleccion
@@ -603,19 +682,46 @@ with tab3:
                 descripcion = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'DESCRIPCION DEL PEP')
             else:
                 tension = "MT" if str(agrupador_busqueda).startswith(("SE", "RADP", "RSDP")) else "BT"
-                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_finalidad))]
+                fb_temp = "H3" if agrupador_busqueda in ["RAAP", "RSAP"] else fb_finalidad
+                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_temp))]
                 if not filtro_pep.empty:
                     seccion, parte = filtro_pep.iloc[0][18], filtro_pep.iloc[0][20]   
                 match_desc = df_peps[df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)]
                 if not match_desc.empty: descripcion = match_desc.iloc[0][21]
 
+            # --- LÓGICA DE DEFINICIÓN DE CÓDIGO (RAAP/RSAP y DS11) ---
+            pry_str = str(params['pry']).strip().upper()
+            if agrupador_busqueda in ["RAAP", "RSAP"]:
+                fb_row = "H3"
+                codigos_especiales = ["DD002", "DD003", "DD004", "DD005", "DD006", "DD007"]
+                codigo_row = "AP100" if pry_str in codigos_especiales else "AP053"
+            else:
+                fb_row = fb_finalidad
+                if pry_str.startswith("DS11"):
+                    desc_upper = str(descripcion).upper()
+                    if str(agrupador_busqueda).upper().startswith("SE"):
+                        codigo_row = "DS113"
+                    elif "MT" in desc_upper:
+                        codigo_row = "DS112"
+                    elif "BT" in desc_upper:
+                        codigo_row = "DS111"
+                    else:
+                        codigo_row = pry_str
+                else:
+                    codigo_row = pry_str
+
             fila_excel = {
-                "POSICION_NUMERO": i + 1, "GRUPO_PRESUPUESTO": agrupador_original, "POSICION_TIPO": posicion_tipo,
+                "POSICION_NUMERO": i + 1, 
+                "GRUPO_PRESUPUESTO": agrupador_busqueda,
+                "POSICION_TIPO": posicion_tipo,
                 "OPERACION_NUMERO": 10, "CONTRATO_ID": contrato_final, "CONTRATO_POSICION": "", "MATERIAL": mat_final,
                 "MATERIAL_UNIDAD_MEDIDA": "", "MATERIAL_COSTO_UNITARIO": "", "MATERIAL_CANTIDAD": cantidad, "MATERIAL_COSTO_TOTAL": "",
                 "FECHA_RESERVA": fecha_reserva_final, "EMPLAZAMIENTO": emplazamiento_final, "PROY_INSPECTOR_USUARIO": "", "TENSION_NIVEL": tension,
-                "PROY_TIPOLOGIA_ID": params['tipologia'], "SECCION": seccion, "PROY_PARTE_ID": parte, "CODIGO_INTERNO": params['pry'],
-                "PROY_ZONA_ID": zona_final, "PRESUPUESTO_FINALIDAD": fb_finalidad, "ELEMENTO_PEP": "", "ODM_PRESUPUESTO": "", "ODM_PRESPTO_DESCRIPCION": descripcion, "TAM": ""
+                "PROY_TIPOLOGIA_ID": params['tipologia'], "SECCION": seccion, "PROY_PARTE_ID": parte, 
+                "CODIGO_INTERNO": codigo_row,
+                "PROY_ZONA_ID": zona_final, 
+                "PRESUPUESTO_FINALIDAD": fb_row,
+                "ELEMENTO_PEP": "", "ODM_PRESUPUESTO": "", "ODM_PRESPTO_DESCRIPCION": descripcion, "TAM": ""
             }
             datos_finales_ot.append(fila_excel)
 
