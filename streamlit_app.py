@@ -263,7 +263,7 @@ with tab1:
                 if contrato_seleccionado == "Automático":
                     if area_seleccionada == "Proyectos BT":
                         if distrito in ["LOS OLIVOS", "COMAS"]:
-                            contrato_id = "5200000077"
+                            contrato_id = "5200000072"
                         elif "COLONIAL" in org_mantenimiento:
                             contrato_id = "5200000075"
                         elif "PANAMERICANA" in org_mantenimiento:
@@ -279,7 +279,7 @@ with tab1:
                 elif contrato_seleccionado == "Applus Panamericana":
                     contrato_id = "5200000102"
                 elif contrato_seleccionado == "Satel":
-                    contrato_id = "5200000077"
+                    contrato_id = "5200000072"
                 else:
                     contrato_id = ""
 
@@ -315,6 +315,14 @@ with tab2:
     col_vas1, col_vas2, col_vas3, col_vas4, col_vas5 = st.columns(5)
     with col_vas1:
         archivo_vas = st.file_uploader("Sube el archivo VAS (.xlsx)", type=['xlsx'])
+        
+        # --- NUEVA LÓGICA: LIMPIEZA SI SE ELIMINA EL ARCHIVO VAS ---
+        if archivo_vas is None:
+            if 'datos_vas' in st.session_state:
+                del st.session_state['datos_vas']
+            if 'params_vas' in st.session_state:
+                del st.session_state['params_vas']
+
     with col_vas2:
         seds_disponibles = df_guia['SED'].dropna().unique().tolist() if df_guia is not None and 'SED' in df_guia.columns else []
         sed_vas = st.selectbox("1. SED", options=[""] + seds_disponibles, key="sed_vas2")
@@ -535,6 +543,14 @@ with tab3:
     col_ot1, col_ot2, col_ot3, col_ot4, col_ot5 = st.columns(5)
     with col_ot1:
         archivo_ot = st.file_uploader("Sube el archivo OT (.xlsx)", type=['xlsx'])
+
+        # --- NUEVA LÓGICA: LIMPIEZA SI SE ELIMINA EL ARCHIVO OT ---
+        if archivo_ot is None:
+            if 'datos_ot' in st.session_state:
+                del st.session_state['datos_ot']
+            if 'params_ot' in st.session_state:
+                del st.session_state['params_ot']
+
     with col_ot2:
         seds_disponibles = df_guia['SED'].dropna().unique().tolist() if df_guia is not None and 'SED' in df_guia.columns else []
         sed_ot = st.selectbox("1. SED", options=[""] + seds_disponibles, key="sed_ot")
@@ -737,6 +753,13 @@ with tab4:
     st.info("Sube tus documentos (Word, Excel, PDF). El sistema buscará el código antiguo y lo reemplazará por el nuevo, además de renombrar los archivos.")
 
     archivos_versionar = st.file_uploader("1. Sube los documentos (.docx, .xlsx, .pdf)", type=["docx", "xlsx", "pdf"], accept_multiple_files=True)
+
+    # --- NUEVA LÓGICA: LIMPIEZA SI SE ELIMINAN LOS ARCHIVOS A VERSIONAR ---
+    if not archivos_versionar:
+        if 'zip_versionado' in st.session_state:
+            del st.session_state['zip_versionado']
+        if 'zip_name' in st.session_state:
+            del st.session_state['zip_name']
 
     col_v1, col_v2 = st.columns(2)
     with col_v1:
