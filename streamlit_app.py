@@ -271,7 +271,7 @@ with tab1:
                         else:
                             contrato_id = "" 
                     elif area_seleccionada == "Proyectos MT/BT":
-                        contrato_id = "5200000077"
+                        contrato_id = "5200000072"
                     else:
                         contrato_id = ""
                 elif contrato_seleccionado == "Applus Colonial":
@@ -488,8 +488,7 @@ with tab2:
             pry_str = str(params['pry']).strip().upper()
             if agrupador_busqueda in ["RAAP", "RSAP"]:
                 fb_row = "H3"
-                codigos_especiales = ["DD002", "DD003", "DD004", "DD005", "DD006", "DD007"]
-                codigo_row = "AP100" if pry_str in codigos_especiales else "AP053"
+                codigo_row = "AP100" if pry_str != "DD001" else "AP053"
             else:
                 fb_row = fb_finalidad
                 if pry_str.startswith("DS11"):
@@ -563,7 +562,7 @@ with tab3:
                 col_cant = cols_dict.get("cantidad")
 
                 if not (col_agp and col_tipo and col_mat and col_cant):
-                   st.error(f"❌ El archivo no tiene las columnas correctas.")
+                    st.error(f"❌ El archivo no tiene las columnas correctas.")
                 else:
                     distrito_ot = get_val(df_guia, 'SED', sed_ot, 'DISTRITO')
                     bloque_mat, bloque_serv, bloque_esp = [], [], []
@@ -693,8 +692,7 @@ with tab3:
             pry_str = str(params['pry']).strip().upper()
             if agrupador_busqueda in ["RAAP", "RSAP"]:
                 fb_row = "H3"
-                codigos_especiales = ["DD002", "DD003", "DD004", "DD005", "DD006", "DD007"]
-                codigo_row = "AP100" if pry_str in codigos_especiales else "AP053"
+                codigo_row = "AP100" if pry_str != "DD001" else "AP053"
             else:
                 fb_row = fb_finalidad
                 if pry_str.startswith("DS11"):
