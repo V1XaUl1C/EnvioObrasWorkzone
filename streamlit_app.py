@@ -510,7 +510,12 @@ with tab2:
                 parte = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'PROY_PARTE_ID')
                 descripcion = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'DESCRIPCION DEL PEP')
             else:
-                tension = "MT" if str(agrupador_busqueda).startswith(("SE", "RADP", "RSDP")) else "BT"
+                # --- NUEVA LÓGICA DE TENSION PARA RAAP/RSAP ---
+                if agrupador_busqueda in ["RAAP", "RSAP"]:
+                    tension = "AP"
+                else:
+                    tension = "MT" if str(agrupador_busqueda).startswith(("SE", "RADP", "RSDP")) else "BT"
+                
                 fb_temp = "H3" if agrupador_busqueda in ["RAAP", "RSAP"] else fb_finalidad
                 filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_temp))]
                 if not filtro_pep.empty:
@@ -732,7 +737,12 @@ with tab3:
                 parte = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'PROY_PARTE_ID')
                 descripcion = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'DESCRIPCION DEL PEP')
             else:
-                tension = "MT" if str(agrupador_busqueda).startswith(("SE", "RADP", "RSDP")) else "BT"
+                # --- NUEVA LÓGICA DE TENSION PARA RAAP/RSAP ---
+                if agrupador_busqueda in ["RAAP", "RSAP"]:
+                    tension = "AP"
+                else:
+                    tension = "MT" if str(agrupador_busqueda).startswith(("SE", "RADP", "RSDP")) else "BT"
+                
                 fb_temp = "H3" if agrupador_busqueda in ["RAAP", "RSAP"] else fb_finalidad
                 filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_temp))]
                 if not filtro_pep.empty:
