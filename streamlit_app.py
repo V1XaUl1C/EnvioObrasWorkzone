@@ -238,30 +238,32 @@ tab1, tab2, tab3, tab4 = st.tabs([
 with tab1:
     st.subheader("Generación de Plantilla ODM ING")
 
+    # Llave dinámica para Tab 1
+    if 't1_key' not in st.session_state: 
+        st.session_state['t1_key'] = 0
+
     if df_guia is not None:
         col_input1, col_input2, col_input3 = st.columns(3)
         with col_input1:
             lista_seds = df_guia['SED'].dropna().unique().tolist() if 'SED' in df_guia.columns else []
-            sed_seleccionada = st.selectbox("1. Selecciona SED", options=[""] + lista_seds, key="t1_sed")
+            sed_seleccionada = st.selectbox("1. Selecciona SED", options=[""] + lista_seds, key=f"t1_sed_{st.session_state['t1_key']}")
         with col_input2:
             lista_codigos = df_capex['Cod. Int.'].dropna().astype(str).unique().tolist() if 'Cod. Int.' in df_capex.columns else []
-            codigo_seleccionado = st.selectbox("2. Selecciona Código Interno", options=[""] + lista_codigos, key="t1_cod")
+            codigo_seleccionado = st.selectbox("2. Selecciona Código Interno", options=[""] + lista_codigos, key=f"t1_cod_{st.session_state['t1_key']}")
         with col_input3:
-            tension_seleccionada = st.selectbox("3. Selecciona Nivel de Tensión", options=["", "BT", "MT"], key="t1_ten")
+            tension_seleccionada = st.selectbox("3. Selecciona Nivel de Tensión", options=["", "BT", "MT"], key=f"t1_ten_{st.session_state['t1_key']}")
         
-        # --- MODIFICACIÓN: Nuevos inputs Área y Contrato ---
         col_input4, col_input5, _ = st.columns([1, 1, 1])
         with col_input4:
-            area_seleccionada = st.selectbox("4. Área", options=["Proyectos BT", "Proyectos MT/BT"], key="t1_area")
+            area_seleccionada = st.selectbox("4. Área", options=["Proyectos BT", "Proyectos MT/BT"], key=f"t1_area_{st.session_state['t1_key']}")
         with col_input5:
-            contrato_seleccionado = st.selectbox("5. Contrato", options=["Automático", "Applus Colonial", "Applus Panamericana", "Satel"], key="t1_con")
+            contrato_seleccionado = st.selectbox("5. Contrato", options=["Automático", "Applus Colonial", "Applus Panamericana", "Satel"], key=f"t1_con_{st.session_state['t1_key']}")
         st.markdown("---")
         
         col_btn1, col_btn2 = st.columns([2, 8])
         
         if col_btn2.button("🧹 Limpiar Campos", key="btn_limpiar_tab1"):
-            for k in ['t1_sed', 't1_cod', 't1_ten', 't1_area', 't1_con']:
-                st.session_state.pop(k, None)
+            st.session_state['t1_key'] += 1
             recargar_pagina()
 
         if col_btn1.button("🚀 Generar Plantilla Excel"):
@@ -326,13 +328,13 @@ with tab1:
 with tab2:
     st.subheader("Conversión de archivo VAS a Plantilla Final")
 
-    # Clave dinámica para resetear el uploader
-    if 'vas_uploader_key' not in st.session_state: 
-        st.session_state['vas_uploader_key'] = 0
+    # Llave dinámica para Tab 2
+    if 'vas_key' not in st.session_state: 
+        st.session_state['vas_key'] = 0
 
     col_vas1, col_vas2, col_vas3, col_vas4, col_vas5 = st.columns(5)
     with col_vas1:
-        archivo_vas = st.file_uploader("Sube el archivo VAS (.xlsx)", type=['xlsx'], key=f"file_vas_{st.session_state['vas_uploader_key']}")
+        archivo_vas = st.file_uploader("Sube el archivo VAS (.xlsx)", type=['xlsx'], key=f"file_vas_{st.session_state['vas_key']}")
         
         if archivo_vas is None:
             if 'datos_vas' in st.session_state: del st.session_state['datos_vas']
@@ -340,14 +342,14 @@ with tab2:
 
     with col_vas2:
         seds_disponibles = df_guia['SED'].dropna().unique().tolist() if df_guia is not None and 'SED' in df_guia.columns else []
-        sed_vas = st.selectbox("1. SED", options=[""] + seds_disponibles, key="sed_vas2")
+        sed_vas = st.selectbox("1. SED", options=[""] + seds_disponibles, key=f"sed_vas_{st.session_state['vas_key']}")
     with col_vas3:
         codigos_disponibles = df_capex['Cod. Int.'].dropna().astype(str).unique().tolist() if df_capex is not None and 'Cod. Int.' in df_capex.columns else []
-        cod_pry_vas = st.selectbox("2. Código PRY", options=[""] + codigos_disponibles, key="cod_pry_vas2")
+        cod_pry_vas = st.selectbox("2. Código PRY", options=[""] + codigos_disponibles, key=f"cod_pry_vas_{st.session_state['vas_key']}")
     with col_vas4:
-        plazo_vas = st.selectbox("3. Plazo Legal", options=["", "21", "56", "360"], key="plazo_vas_key")
+        plazo_vas = st.selectbox("3. Plazo Legal", options=["", "21", "56", "360"], key=f"plazo_vas_{st.session_state['vas_key']}")
     with col_vas5:
-        tipologia_vas = st.selectbox("4. Tipología ID", options=["", "N", "R"], key="tipo_vas_key")
+        tipologia_vas = st.selectbox("4. Tipología ID", options=["", "N", "R"], key=f"tipo_vas_{st.session_state['vas_key']}")
 
     st.markdown("---")
     
@@ -356,9 +358,9 @@ with tab2:
 
     # --- BOTÓN LIMPIAR VAS ---
     if col_b2.button("🧹 Limpiar Todo", key="btn_limpiar_tab2"):
-        st.session_state['vas_uploader_key'] += 1
-        for k in ['sed_vas2', 'cod_pry_vas2', 'plazo_vas_key', 'tipo_vas_key', 'datos_vas', 'params_vas']:
-            st.session_state.pop(k, None)
+        st.session_state['vas_key'] += 1
+        if 'datos_vas' in st.session_state: del st.session_state['datos_vas']
+        if 'params_vas' in st.session_state: del st.session_state['params_vas']
         recargar_pagina()
 
     if btn_procesar_vas:
@@ -516,7 +518,6 @@ with tab2:
                 match_desc = df_peps[df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)]
                 if not match_desc.empty: descripcion = match_desc.iloc[0][21]
 
-            # --- LÓGICA DE DEFINICIÓN DE CÓDIGO (RAAP/RSAP y DS11) ---
             pry_str = str(params['pry']).strip().upper()
             if agrupador_busqueda in ["RAAP", "RSAP"]:
                 fb_row = "H3"
@@ -564,12 +565,13 @@ with tab3:
     st.subheader("Conversión de plantilla OT a Plantilla Final")
     st.info("Sube tu archivo Pre-Matriz (Excel) con las columnas: Agrup.Prot.AGP, Tipo, Mat./LrAst., Cantidad.")
 
-    if 'ot_uploader_key' not in st.session_state: 
-        st.session_state['ot_uploader_key'] = 0
+    # Llave dinámica para Tab 3
+    if 'ot_key' not in st.session_state: 
+        st.session_state['ot_key'] = 0
 
     col_ot1, col_ot2, col_ot3, col_ot4, col_ot5 = st.columns(5)
     with col_ot1:
-        archivo_ot = st.file_uploader("Sube el archivo OT (.xlsx)", type=['xlsx'], key=f"file_ot_{st.session_state['ot_uploader_key']}")
+        archivo_ot = st.file_uploader("Sube el archivo OT (.xlsx)", type=['xlsx'], key=f"file_ot_{st.session_state['ot_key']}")
 
         if archivo_ot is None:
             if 'datos_ot' in st.session_state: del st.session_state['datos_ot']
@@ -577,14 +579,14 @@ with tab3:
 
     with col_ot2:
         seds_disponibles = df_guia['SED'].dropna().unique().tolist() if df_guia is not None and 'SED' in df_guia.columns else []
-        sed_ot = st.selectbox("1. SED", options=[""] + seds_disponibles, key="sed_ot")
+        sed_ot = st.selectbox("1. SED", options=[""] + seds_disponibles, key=f"sed_ot_{st.session_state['ot_key']}")
     with col_ot3:
         codigos_disponibles = df_capex['Cod. Int.'].dropna().astype(str).unique().tolist() if df_capex is not None and 'Cod. Int.' in df_capex.columns else []
-        cod_pry_ot = st.selectbox("2. Código PRY", options=[""] + codigos_disponibles, key="cod_pry_ot")
+        cod_pry_ot = st.selectbox("2. Código PRY", options=[""] + codigos_disponibles, key=f"cod_pry_ot_{st.session_state['ot_key']}")
     with col_ot4:
-        plazo_ot = st.selectbox("3. Plazo Legal", options=["", "21", "56", "360"], key="plazo_ot_key")
+        plazo_ot = st.selectbox("3. Plazo Legal", options=["", "21", "56", "360"], key=f"plazo_ot_{st.session_state['ot_key']}")
     with col_ot5:
-        tipologia_ot = st.selectbox("4. Tipología ID", options=["", "N", "R"], key="tipo_ot_key")
+        tipologia_ot = st.selectbox("4. Tipología ID", options=["", "N", "R"], key=f"tipo_ot_{st.session_state['ot_key']}")
 
     st.markdown("---")
 
@@ -593,9 +595,9 @@ with tab3:
 
     # --- BOTÓN LIMPIAR OT ---
     if col_b2.button("🧹 Limpiar Todo", key="btn_limpiar_tab3"):
-        st.session_state['ot_uploader_key'] += 1
-        for k in ['sed_ot', 'cod_pry_ot', 'plazo_ot_key', 'tipo_ot_key', 'datos_ot', 'params_ot']:
-            st.session_state.pop(k, None)
+        st.session_state['ot_key'] += 1
+        if 'datos_ot' in st.session_state: del st.session_state['datos_ot']
+        if 'params_ot' in st.session_state: del st.session_state['params_ot']
         recargar_pagina()
 
     if btn_procesar_ot:
@@ -738,7 +740,6 @@ with tab3:
                 match_desc = df_peps[df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)]
                 if not match_desc.empty: descripcion = match_desc.iloc[0][21]
 
-            # --- LÓGICA DE DEFINICIÓN DE CÓDIGO (RAAP/RSAP y DS11) ---
             pry_str = str(params['pry']).strip().upper()
             if agrupador_busqueda in ["RAAP", "RSAP"]:
                 fb_row = "H3"
@@ -786,10 +787,11 @@ with tab4:
     st.subheader("📁 Versionar Documentos del Expediente")
     st.info("Sube tus documentos (Word, Excel, PDF). El sistema buscará el código antiguo y lo reemplazará por el nuevo, además de renombrar los archivos.")
 
-    if 'ver_uploader_key' not in st.session_state: 
-        st.session_state['ver_uploader_key'] = 0
+    # Llave dinámica para Tab 4
+    if 'ver_key' not in st.session_state: 
+        st.session_state['ver_key'] = 0
 
-    archivos_versionar = st.file_uploader("1. Sube los documentos (.docx, .xlsx, .pdf)", type=["docx", "xlsx", "pdf"], accept_multiple_files=True, key=f"file_ver_{st.session_state['ver_uploader_key']}")
+    archivos_versionar = st.file_uploader("1. Sube los documentos (.docx, .xlsx, .pdf)", type=["docx", "xlsx", "pdf"], accept_multiple_files=True, key=f"file_ver_{st.session_state['ver_key']}")
 
     if not archivos_versionar:
         if 'zip_versionado' in st.session_state: del st.session_state['zip_versionado']
@@ -797,9 +799,9 @@ with tab4:
 
     col_v1, col_v2 = st.columns(2)
     with col_v1:
-        codigo_viejo = st.text_input("2. Código actual a buscar (ej: 212042026...)", key="cod_viejo")
+        codigo_viejo = st.text_input("2. Código actual a buscar (ej: 212042026...)", key=f"cod_viejo_{st.session_state['ver_key']}")
     with col_v2:
-        codigo_nuevo = st.text_input("3. Nuevo código de versión (ej: 800000021)", key="cod_nuevo")
+        codigo_nuevo = st.text_input("3. Nuevo código de versión (ej: 800000021)", key=f"cod_nuevo_{st.session_state['ver_key']}")
 
     st.markdown("---")
     
@@ -808,9 +810,9 @@ with tab4:
 
     # --- BOTÓN LIMPIAR VERSIONADOR ---
     if col_b2.button("🧹 Limpiar Todo", key="btn_limpiar_tab4"):
-        st.session_state['ver_uploader_key'] += 1
-        for k in ['cod_viejo', 'cod_nuevo', 'zip_versionado', 'zip_name']:
-            st.session_state.pop(k, None)
+        st.session_state['ver_key'] += 1
+        if 'zip_versionado' in st.session_state: del st.session_state['zip_versionado']
+        if 'zip_name' in st.session_state: del st.session_state['zip_name']
         recargar_pagina()
 
     if btn_procesar_ver:
