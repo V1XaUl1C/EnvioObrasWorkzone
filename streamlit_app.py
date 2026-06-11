@@ -510,7 +510,7 @@ with tab2:
                 parte = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'PROY_PARTE_ID')
                 descripcion = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'DESCRIPCION DEL PEP')
             else:
-                # --- NUEVA LÓGICA DE TENSION PARA RAAP/RSAP ---
+                # --- LÓGICA DE TENSION PARA RAAP/RSAP ---
                 if agrupador_busqueda in ["RAAP", "RSAP"]:
                     tension = "AP"
                 else:
@@ -522,6 +522,10 @@ with tab2:
                     seccion, parte = filtro_pep.iloc[0][18], filtro_pep.iloc[0][20]   
                 match_desc = df_peps[df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)]
                 if not match_desc.empty: descripcion = match_desc.iloc[0][21]
+
+                # --- NUEVA LÓGICA DE PARTE PARA RAAP ---
+                if agrupador_busqueda == "RAAP":
+                    parte = "1512"
 
             pry_str = str(params['pry']).strip().upper()
             if agrupador_busqueda in ["RAAP", "RSAP"]:
@@ -737,7 +741,7 @@ with tab3:
                 parte = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'PROY_PARTE_ID')
                 descripcion = get_val(df_datos, 'GRUPO_PRESUPUESTO', agrupador_busqueda, 'DESCRIPCION DEL PEP')
             else:
-                # --- NUEVA LÓGICA DE TENSION PARA RAAP/RSAP ---
+                # --- LÓGICA DE TENSION PARA RAAP/RSAP ---
                 if agrupador_busqueda in ["RAAP", "RSAP"]:
                     tension = "AP"
                 else:
@@ -749,6 +753,10 @@ with tab3:
                     seccion, parte = filtro_pep.iloc[0][18], filtro_pep.iloc[0][20]   
                 match_desc = df_peps[df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)]
                 if not match_desc.empty: descripcion = match_desc.iloc[0][21]
+
+                # --- NUEVA LÓGICA DE PARTE PARA RAAP ---
+                if agrupador_busqueda == "RAAP":
+                    parte = "1512"
 
             pry_str = str(params['pry']).strip().upper()
             if agrupador_busqueda in ["RAAP", "RSAP"]:
