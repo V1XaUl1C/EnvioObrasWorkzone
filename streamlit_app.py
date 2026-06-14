@@ -279,7 +279,7 @@ with tab1:
                 if contrato_seleccionado == "Automático":
                     if area_seleccionada == "Proyectos BT":
                         if distrito in ["LOS OLIVOS", "COMAS"]:
-                            contrato_id = "5200000072"
+                            contrato_id = "5200000077"
                         elif "COLONIAL" in org_mantenimiento:
                             contrato_id = "5200000075"
                         elif "PANAMERICANA" in org_mantenimiento:
@@ -303,7 +303,10 @@ with tab1:
                 fecha_reserva = datetime.now().strftime("%d.%m.%Y")
                 emplazamiento = f"M-{alim}"
                 
+                # --- LÓGICA DE FB PARA PER01 Y PER02 ---
                 fb_finalidad_ing = get_val(df_capex, 'Cod. Int.', codigo_seleccionado, 'FB')
+                if str(codigo_seleccionado).strip().upper() in ["PER01", "PER02"]:
+                    fb_finalidad_ing = "R1"
                 
                 fila_base = {
                     "GRUPO_PRESUPUESTO": "ING", "OPERACION_NUMERO": 10, "CONTRATO_ID": contrato_id, "CONTRATO_POSICION": "",
@@ -438,8 +441,12 @@ with tab2:
     if 'datos_vas' in st.session_state:
         datos_vas = st.session_state['datos_vas']
         params = st.session_state['params_vas']
-        fb_finalidad = get_val(df_capex, 'Cod. Int.', params['pry'], 'FB')
         
+        # --- LÓGICA DE FB PARA PER01 Y PER02 ---
+        fb_finalidad = get_val(df_capex, 'Cod. Int.', params['pry'], 'FB')
+        if str(params['pry']).strip().upper() in ["PER01", "PER02"]:
+            fb_finalidad = "R1"
+            
         agrupadores_unicos = {row['Agrup.Prot.AGP'] for row in datos_vas}
         agrupadores_con_vacios = []
         peps_validos = []
@@ -669,8 +676,12 @@ with tab3:
     if 'datos_ot' in st.session_state:
         datos_ot = st.session_state['datos_ot']
         params = st.session_state['params_ot']
-        fb_finalidad = get_val(df_capex, 'Cod. Int.', params['pry'], 'FB')
         
+        # --- LÓGICA DE FB PARA PER01 Y PER02 ---
+        fb_finalidad = get_val(df_capex, 'Cod. Int.', params['pry'], 'FB')
+        if str(params['pry']).strip().upper() in ["PER01", "PER02"]:
+            fb_finalidad = "R1"
+            
         agrupadores_unicos = {row['Agrup.Prot.AGP'] for row in datos_ot}
         agrupadores_con_vacios = []
         peps_validos = []
