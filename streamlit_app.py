@@ -303,10 +303,8 @@ with tab1:
                 fecha_reserva = datetime.now().strftime("%d.%m.%Y")
                 emplazamiento = f"M-{alim}"
                 
-                # --- LÓGICA DE FB PARA PER01 Y PER02 ---
+                # Aquí simplemente saca lo que está en Excel sin sobreescribirlo
                 fb_finalidad_ing = get_val(df_capex, 'Cod. Int.', codigo_seleccionado, 'FB')
-                if str(codigo_seleccionado).strip().upper() in ["PER01", "PER02"]:
-                    fb_finalidad_ing = "R1"
                 
                 fila_base = {
                     "GRUPO_PRESUPUESTO": "ING", "OPERACION_NUMERO": 10, "CONTRATO_ID": contrato_id, "CONTRATO_POSICION": "",
@@ -442,16 +440,16 @@ with tab2:
         datos_vas = st.session_state['datos_vas']
         params = st.session_state['params_vas']
         
-        # --- LÓGICA DE FB PARA PER01 Y PER02 ---
+        # --- FB NORMAL (PARA EL EXCEL) Y FB_SEARCH (PARA BUSCAR) ---
         fb_finalidad = get_val(df_capex, 'Cod. Int.', params['pry'], 'FB')
-        if str(params['pry']).strip().upper() in ["PER01", "PER02"]:
-            fb_finalidad = "R1"
+        fb_search = "R1" if str(params['pry']).strip().upper() in ["PER01", "PER02"] else fb_finalidad
             
         agrupadores_unicos = {row['Agrup.Prot.AGP'] for row in datos_vas}
         agrupadores_con_vacios = []
         peps_validos = []
         if df_peps is not None:
-            mask = df_peps[5].astype(str).str.strip() == str(fb_finalidad).strip()
+            # Buscamos usando el FB "trampa" (fb_search)
+            mask = df_peps[5].astype(str).str.strip() == str(fb_search).strip()
             peps_validos = df_peps[mask][1].astype(str).str.strip().dropna().unique().tolist()
             peps_validos = [p for p in peps_validos if p and p.lower() != 'nan']
             
@@ -463,7 +461,8 @@ with tab2:
 
         for agp in agrupadores_unicos:
             if agp not in lista_cx:
-                fb_check = "H3" if agp in ["RAAP", "RSAP"] else fb_finalidad
+                # Chequeamos usando el fb_search
+                fb_check = "H3" if agp in ["RAAP", "RSAP"] else fb_search
                 filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agp)) & (df_peps[5].astype(str).str.strip() == str(fb_check))]
                 if filtro_pep.empty:
                     agrupadores_con_vacios.append(agp)
@@ -523,7 +522,8 @@ with tab2:
                 else:
                     tension = "MT" if str(agrupador_busqueda).startswith(("SE", "RADP", "RSDP")) else "BT"
                 
-                fb_temp = "H3" if agrupador_busqueda in ["RAAP", "RSAP"] else fb_finalidad
+                # Buscamos la descripción y sección con el fb_search
+                fb_temp = "H3" if agrupador_busqueda in ["RAAP", "RSAP"] else fb_search
                 filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_temp))]
                 if not filtro_pep.empty:
                     seccion, parte = filtro_pep.iloc[0][18], filtro_pep.iloc[0][20]   
@@ -539,6 +539,7 @@ with tab2:
                 fb_row = "H3"
                 codigo_row = "AP100" if pry_str != "DD001" else "AP053"
             else:
+                # Usamos el FB ORIGINAL de la base de datos para registrarlo en el excel
                 fb_row = fb_finalidad
                 if pry_str.startswith("DS11"):
                     desc_upper = str(descripcion).upper()
@@ -677,16 +678,16 @@ with tab3:
         datos_ot = st.session_state['datos_ot']
         params = st.session_state['params_ot']
         
-        # --- LÓGICA DE FB PARA PER01 Y PER02 ---
+        # --- FB NORMAL (PARA EL EXCEL) Y FB_SEARCH (PARA BUSCAR) ---
         fb_finalidad = get_val(df_capex, 'Cod. Int.', params['pry'], 'FB')
-        if str(params['pry']).strip().upper() in ["PER01", "PER02"]:
-            fb_finalidad = "R1"
+        fb_search = "R1" if str(params['pry']).strip().upper() in ["PER01", "PER02"] else fb_finalidad
             
         agrupadores_unicos = {row['Agrup.Prot.AGP'] for row in datos_ot}
         agrupadores_con_vacios = []
         peps_validos = []
         if df_peps is not None:
-            mask = df_peps[5].astype(str).str.strip() == str(fb_finalidad).strip()
+            # Buscamos usando el FB "trampa" (fb_search)
+            mask = df_peps[5].astype(str).str.strip() == str(fb_search).strip()
             peps_validos = df_peps[mask][1].astype(str).str.strip().dropna().unique().tolist()
             peps_validos = [p for p in peps_validos if p and p.lower() != 'nan']
             
@@ -698,7 +699,8 @@ with tab3:
 
         for agp in agrupadores_unicos:
             if agp not in lista_cx:
-                fb_check = "H3" if agp in ["RAAP", "RSAP"] else fb_finalidad
+                # Chequeamos usando el fb_search
+                fb_check = "H3" if agp in ["RAAP", "RSAP"] else fb_search
                 filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agp)) & (df_peps[5].astype(str).str.strip() == str(fb_check))]
                 if filtro_pep.empty:
                     agrupadores_con_vacios.append(agp)
@@ -758,7 +760,8 @@ with tab3:
                 else:
                     tension = "MT" if str(agrupador_busqueda).startswith(("SE", "RADP", "RSDP")) else "BT"
                 
-                fb_temp = "H3" if agrupador_busqueda in ["RAAP", "RSAP"] else fb_finalidad
+                # Buscamos la descripción y sección con el fb_search
+                fb_temp = "H3" if agrupador_busqueda in ["RAAP", "RSAP"] else fb_search
                 filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_temp))]
                 if not filtro_pep.empty:
                     seccion, parte = filtro_pep.iloc[0][18], filtro_pep.iloc[0][20]   
@@ -774,6 +777,7 @@ with tab3:
                 fb_row = "H3"
                 codigo_row = "AP100" if pry_str != "DD001" else "AP053"
             else:
+                # Usamos el FB ORIGINAL de la base de datos para registrarlo en el excel
                 fb_row = fb_finalidad
                 if pry_str.startswith("DS11"):
                     desc_upper = str(descripcion).upper()
