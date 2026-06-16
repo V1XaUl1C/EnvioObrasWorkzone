@@ -189,7 +189,13 @@ def procesar_excel_automatico(ruta_absoluta, viejo, nuevo):
         return False
 
 def procesar_pdf(ruta, viejo, nuevo):
-    doc = fitz.open(ruta)
+    # Leemos el archivo a memoria primero para evitar problemas de I/O en la Nube
+    with open(ruta, "rb") as f:
+        pdf_bytes = f.read()
+        
+    # Le pasamos el stream de memoria a PyMuPDF en lugar de la ruta del disco
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    
     for pagina in doc:
         areas_texto = pagina.search_for(viejo)
         spans_formato = []
@@ -219,10 +225,9 @@ def procesar_pdf(ruta, viejo, nuevo):
             punto_insercion = fitz.Point(rect.x0, rect.y1 - (rect.height*0.15))
             pagina.insert_text(punto_insercion, nuevo, fontsize=tamano_fuente, color=color_fuente, fontname="helv")
 
-    ruta_temp = ruta+".tmp"
-    doc.save(ruta_temp, incremental=False, encryption=0)
+    # Guardamos sobreescribiendo el archivo original directamente
+    doc.save(ruta, incremental=False, encryption=0)
     doc.close()
-    os.replace(ruta_temp, ruta)
 
 # ---------------- Interfaz con Pestañas ----------------
 st.markdown("<h3 style='color:#2F56A6;'>Selecciona el módulo a utilizar:</h3>", unsafe_allow_html=True)
@@ -669,7 +674,7 @@ with tab3:
 
                     st.session_state['datos_ot'] = bloque_mat + bloque_serv + bloque_esp
                     st.session_state['params_ot'] = {
-                       "sed": sed_ot, "pry": cod_pry_ot, "plazo": plazo_ot, "tipologia": tipologia_ot, "distrito": distrito_ot
+                        "sed": sed_ot, "pry": cod_pry_ot, "plazo": plazo_ot, "tipologia": tipologia_ot, "distrito": distrito_ot
                     }
             except Exception as e:
                 st.error(f"❌ Error leyendo el archivo OT: {e}")
@@ -701,7 +706,7 @@ with tab3:
             if agp not in lista_cx:
                 # Chequeamos usando el fb_search
                 fb_check = "H3" if agp in ["RAAP", "RSAP"] else fb_search
-                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agp)) & (df_peps[5].astype(str).str.strip() == str(fb_check))]
+                filtro_pep = df_peps[(df_peps[1].astype(str).str.strip() == str(agrupador_busqueda)) & (df_peps[5].astype(str).str.strip() == str(fb_check))]
                 if filtro_pep.empty:
                     agrupadores_con_vacios.append(agp)
 
@@ -865,7 +870,7 @@ with tab4:
                     ruta_absoluta = os.path.abspath(ruta_temp)
 
                     with open(ruta_absoluta, "wb") as f:
-                        f.write(archivo.getbuffer())
+                        f.write(archivo.getvalue())
 
                     os.chmod(ruta_absoluta, stat.S_IWRITE)
 
