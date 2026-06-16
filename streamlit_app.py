@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import io
 import math
-import html
+import htmL
 import re
 import zipfile
 import shutil
