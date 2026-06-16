@@ -239,15 +239,21 @@ st.markdown("<h4 style='color:#2F56A6; margin-top: 0; text-align:center;'>Enlace
 
 col_link1, col_link2, col_link3, col_link4, col_link5 = st.columns(5)
 
+# Títulos descriptivos encima de cada botón
 with col_link1:
+    st.markdown("<p style='text-align:center; margin-bottom:5px; font-weight:bold; font-size:14px; color:#555;'>Monitor de órdenes</p>", unsafe_allow_html=True)
     st.link_button("🔗 ZPM010", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#ZTRXZ-OpenZPM010?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_385BE5FD6E9CDD23B15640E7913F5511&sap-ui-tech-hint=GUI", use_container_width=True)
 with col_link2:
+    st.markdown("<p style='text-align:center; margin-bottom:5px; font-weight:bold; font-size:14px; color:#555;'>Lote de inspección ODM</p>", unsafe_allow_html=True)
     st.link_button("🔗 F2343", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#InspectionLot-manage?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_19201756B9B8750EC90100FD1334A5C2&/?sap-iapp-state--history=TASD20D46VXMN1QWQH0AVM2NC96FFSHFFT7TUR454&sap-iapp-state=TASZMNRM9E42K8KG4ULCKZ58GY8NEJWG0PSWH1FEM", use_container_width=True)
 with col_link3:
+    st.markdown("<p style='text-align:center; margin-bottom:5px; font-weight:bold; font-size:14px; color:#555;'>Migración a Salesforce</p>", unsafe_allow_html=True)
     st.link_button("🔗 ZPM005", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#ZTRXZ-OpenZPM005?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_2FDD0850CF5CD91079D518EB22DB174A&sap-ui-tech-hint=GUI", use_container_width=True)
 with col_link4:
+    st.markdown("<p style='text-align:center; margin-bottom:5px; font-weight:bold; font-size:14px; color:#555;'>Modificar ODM</p>", unsafe_allow_html=True)
     st.link_button("🔗 IW32", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#MaintenanceOrder-change?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_FFEFAAD9B1F0F11F26745DF5FBA898FD&sap-ui-tech-hint=GUI", use_container_width=True)
 with col_link5:
+    st.markdown("<p style='text-align:center; margin-bottom:5px; font-weight:bold; font-size:14px; color:#555;'>Crear ODM</p>", unsafe_allow_html=True)
     st.link_button("🔗 IW31", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#MaintenanceOrder-create?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_2DD560D80CB0ED2C9E30CD12193D06DE&sap-ui-tech-hint=GUI", use_container_width=True)
 
 st.markdown("<hr style='border:1px solid #ddd; margin-top: 15px; margin-bottom: 20px;'>", unsafe_allow_html=True)
@@ -274,21 +280,49 @@ with tab1:
         st.session_state['t1_key'] = 0
 
     if df_guia is not None:
-        col_input1, col_input2, col_input3 = st.columns(3)
-        with col_input1:
-            lista_seds = df_guia['SED'].dropna().unique().tolist() if 'SED' in df_guia.columns else []
-            sed_seleccionada = st.selectbox("1. Selecciona SED", options=[""] + lista_seds, key=f"t1_sed_{st.session_state['t1_key']}")
-        with col_input2:
-            lista_codigos = df_capex['Cod. Int.'].dropna().astype(str).unique().tolist() if 'Cod. Int.' in df_capex.columns else []
-            codigo_seleccionado = st.selectbox("2. Selecciona Código Interno", options=[""] + lista_codigos, key=f"t1_cod_{st.session_state['t1_key']}")
-        with col_input3:
-            tension_seleccionada = st.selectbox("3. Selecciona Nivel de Tensión", options=["", "BT", "MT"], key=f"t1_ten_{st.session_state['t1_key']}")
         
-        col_input4, col_input5, _ = st.columns([1, 1, 1])
+        # Fila 1: Área, SED, Código (El Área va primero porque condiciona al Código y Contrato)
+        col_input1, col_input2, col_input3 = st.columns(3)
+        
+        with col_input1:
+            areas_disponibles = [
+                "Proyectos BT - Lima", 
+                "Proyectos MT/BT - Lima", 
+                "Proyectos Norte Chico", 
+                "Alumbrado Publico - Norte Chico", 
+                "Alumbrado Publico - Lima"
+            ]
+            area_seleccionada = st.selectbox("1. Área", options=areas_disponibles, key=f"t1_area_{st.session_state['t1_key']}")
+            
+        with col_input2:
+            lista_seds = df_guia['SED'].dropna().unique().tolist() if 'SED' in df_guia.columns else []
+            sed_seleccionada = st.selectbox("2. Selecciona SED", options=[""] + lista_seds, key=f"t1_sed_{st.session_state['t1_key']}")
+            
+        with col_input3:
+            lista_codigos = df_capex['Cod. Int.'].dropna().astype(str).unique().tolist() if 'Cod. Int.' in df_capex.columns else []
+            
+            # Filtro exclusivo para Alumbrado
+            if "Alumbrado" in area_seleccionada:
+                lista_codigos = [c for c in lista_codigos if c.startswith("AP")]
+                
+            codigo_seleccionado = st.selectbox("3. Selecciona Código Interno", options=[""] + lista_codigos, key=f"t1_cod_{st.session_state['t1_key']}")
+        
+        # Fila 2: Tensión y Contrato
+        col_input4, col_input5, _ = st.columns(3)
+        
         with col_input4:
-            area_seleccionada = st.selectbox("4. Área", options=["Proyectos BT", "Proyectos MT/BT"], key=f"t1_area_{st.session_state['t1_key']}")
+            tension_seleccionada = st.selectbox("4. Selecciona Nivel de Tensión", options=["", "BT", "MT", "AP"], key=f"t1_ten_{st.session_state['t1_key']}")
+            
         with col_input5:
-            contrato_seleccionado = st.selectbox("5. Contrato", options=["Automático", "Applus Colonial", "Applus Panamericana", "Satel"], key=f"t1_con_{st.session_state['t1_key']}")
+            # Lógica de opciones de contrato según el Área
+            if area_seleccionada in ["Proyectos Norte Chico", "Alumbrado Publico - Norte Chico"]:
+                opciones_contrato = ["Automático (Norte Chico)"]
+            elif area_seleccionada == "Alumbrado Publico - Lima":
+                opciones_contrato = ["", "Applus Colonial", "Applus Panamericana", "Satel"]
+            else:
+                opciones_contrato = ["Automático", "Applus Colonial", "Applus Panamericana", "Satel"]
+                
+            contrato_seleccionado = st.selectbox("5. Contrato", options=opciones_contrato, key=f"t1_con_{st.session_state['t1_key']}")
         
         st.markdown("---")
         
@@ -299,17 +333,19 @@ with tab1:
             recargar_pagina()
 
         if col_btn1.button("🚀 Generar Plantilla Excel"):
-            if not sed_seleccionada or not codigo_seleccionado or not tension_seleccionada:
-                st.warning("⚠️ Completa los campos.")
+            if not sed_seleccionada or not codigo_seleccionado or not tension_seleccionada or not contrato_seleccionado:
+                st.warning("⚠️ Completa todos los campos.")
             else:
                 fila_sed = df_guia[df_guia['SED'] == sed_seleccionada].iloc[0]
                 alim = str(fila_sed.get('ALIM', '')).strip()
                 org_mantenimiento = str(fila_sed.get('ORGANIZACIÓN MANTENIMIENTO', '')).strip().upper()
                 distrito = str(fila_sed.get('DISTRITO', '')).strip().upper()
                 
-                # --- LÓGICA DE SELECCIÓN DE CONTRATO ---
-                if contrato_seleccionado == "Automático":
-                    if area_seleccionada == "Proyectos BT":
+                # --- LÓGICA DE SELECCIÓN DE CONTRATO DEFINITIVO ---
+                if contrato_seleccionado == "Automático (Norte Chico)":
+                    contrato_id = "5200000076"
+                elif contrato_seleccionado == "Automático":
+                    if area_seleccionada == "Proyectos BT - Lima":
                         if distrito in ["LOS OLIVOS", "COMAS"]:
                             contrato_id = "5200000077"
                         elif "COLONIAL" in org_mantenimiento:
@@ -318,7 +354,7 @@ with tab1:
                             contrato_id = "5200000102"
                         else:
                             contrato_id = "" 
-                    elif area_seleccionada == "Proyectos MT/BT":
+                    elif area_seleccionada == "Proyectos MT/BT - Lima":
                         contrato_id = "5200000077"
                     else:
                         contrato_id = ""
@@ -334,7 +370,12 @@ with tab1:
                 zona_id = "A" if "COLONIAL" in org_mantenimiento else ("B" if "PANAMERICANA" in org_mantenimiento else "")
                 fecha_reserva = datetime.now().strftime("%d.%m.%Y")
                 emplazamiento = f"M-{alim}"
-                fb_finalidad_ing = get_val(df_capex, 'Cod. Int.', codigo_seleccionado, 'FB')
+                
+                # --- LÓGICA DE FB PARA ALUMBRADO (H3) ---
+                if "Alumbrado" in area_seleccionada:
+                    fb_finalidad_ing = "H3"
+                else:
+                    fb_finalidad_ing = get_val(df_capex, 'Cod. Int.', codigo_seleccionado, 'FB')
                 
                 fila_base = {
                     "GRUPO_PRESUPUESTO": "ING", "OPERACION_NUMERO": 10, "CONTRATO_ID": contrato_id, "CONTRATO_POSICION": "",
