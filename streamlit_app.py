@@ -317,7 +317,7 @@ with tab1:
             elif "Alumbrado" in area_seleccionada:
                 tension_opciones = ["AP"]
             else:
-                tension_opciones = ["BT", "MT"]
+                tension_opciones = ["", "BT", "MT"]
                 
             tension_seleccionada = st.selectbox("4. Selecciona Nivel de Tensión", options=tension_opciones, key=f"t1_ten_{st.session_state['t1_key']}")
             
@@ -379,7 +379,7 @@ with tab1:
                 fecha_reserva = datetime.now().strftime("%d.%m.%Y")
                 emplazamiento = f"M-{alim}"
                 
-                # --- LÓGICA DE FB PARA ALUMBRADO (H3) ---
+                # --- LÓGICA DE FB, SECCIÓN Y PARTE PARA ALUMBRADO ---
                 if "Alumbrado" in area_seleccionada:
                     fb_finalidad_ing = "H3"
                     seccion_ing = 151
@@ -393,7 +393,7 @@ with tab1:
                     "GRUPO_PRESUPUESTO": "ING", "OPERACION_NUMERO": 10, "CONTRATO_ID": contrato_id, "CONTRATO_POSICION": "",
                     "MATERIAL_UNIDAD_MEDIDA": "", "MATERIAL_COSTO_UNITARIO": "", "MATERIAL_CANTIDAD": 1, "MATERIAL_COSTO_TOTAL": "",
                     "FECHA_RESERVA": fecha_reserva, "EMPLAZAMIENTO": emplazamiento, "PROY_INSPECTOR_USUARIO": "", "TENSION_NIVEL": tension_seleccionada,
-                    "PROY_TIPOLOGIA_ID": "N", "SECCION": 154, "PROY_PARTE_ID": 1545, "CODIGO_INTERNO": codigo_seleccionado, "PROY_ZONA_ID": zona_id,
+                    "PROY_TIPOLOGIA_ID": "N", "SECCION": seccion_ing, "PROY_PARTE_ID": parte_ing, "CODIGO_INTERNO": codigo_seleccionado, "PROY_ZONA_ID": zona_id,
                     "PRESUPUESTO_FINALIDAD": fb_finalidad_ing, "ELEMENTO_PEP": "", "ODM_PRESUPUESTO": "", "ODM_PRESPTO_DESCRIPCION": "Ingenieria de Proyectos", "TAM": ""
                 }
                 
