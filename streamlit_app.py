@@ -317,7 +317,7 @@ with tab1:
             elif "Alumbrado" in area_seleccionada:
                 tension_opciones = ["AP"]
             else:
-                tension_opciones = ["", "BT", "MT"]
+                tension_opciones = ["BT", "MT"]
                 
             tension_seleccionada = st.selectbox("4. Selecciona Nivel de Tensión", options=tension_opciones, key=f"t1_ten_{st.session_state['t1_key']}")
             
@@ -382,8 +382,12 @@ with tab1:
                 # --- LÓGICA DE FB PARA ALUMBRADO (H3) ---
                 if "Alumbrado" in area_seleccionada:
                     fb_finalidad_ing = "H3"
+                    seccion_ing = 151
+                    parte_ing = 1512
                 else:
                     fb_finalidad_ing = get_val(df_capex, 'Cod. Int.', codigo_seleccionado, 'FB')
+                    seccion_ing = 154
+                    parte_ing = 1545
                 
                 fila_base = {
                     "GRUPO_PRESUPUESTO": "ING", "OPERACION_NUMERO": 10, "CONTRATO_ID": contrato_id, "CONTRATO_POSICION": "",
