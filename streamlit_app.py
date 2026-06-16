@@ -311,7 +311,15 @@ with tab1:
         col_input4, col_input5, _ = st.columns(3)
         
         with col_input4:
-            tension_seleccionada = st.selectbox("4. Selecciona Nivel de Tensión", options=["", "BT", "MT", "AP"], key=f"t1_ten_{st.session_state['t1_key']}")
+            # Lógica automática para Nivel de Tensión
+            if area_seleccionada == "Proyectos BT - Lima":
+                tension_opciones = ["BT"]
+            elif "Alumbrado" in area_seleccionada:
+                tension_opciones = ["AP"]
+            else:
+                tension_opciones = ["", "BT", "MT"]
+                
+            tension_seleccionada = st.selectbox("4. Selecciona Nivel de Tensión", options=tension_opciones, key=f"t1_ten_{st.session_state['t1_key']}")
             
         with col_input5:
             # Lógica de opciones de contrato según el Área
