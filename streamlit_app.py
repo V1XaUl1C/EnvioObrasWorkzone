@@ -230,7 +230,31 @@ with col2:
 with col3:
     st.image(logo_path1, width=140)
 
-st.markdown("<hr style='border:2px solid #2F56A6;'>", unsafe_allow_html=True)
+st.markdown("<hr style='border:2px solid #2F56A6; margin-top: 5px; margin-bottom: 15px;'>", unsafe_allow_html=True)
+
+# =========================================================
+# BOTONES DE ENLACES RÁPIDOS A SAP
+# =========================================================
+st.markdown("<h4 style='color:#2F56A6; margin-top: 0; text-align:center;'>Enlaces Rápidos SAP Workzone</h4>", unsafe_allow_html=True)
+
+col_link1, col_link2, col_link3, col_link4, col_link5 = st.columns(5)
+
+with col_link1:
+    st.link_button("🔗 ZPM010", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#ZTRXZ-OpenZPM010?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_385BE5FD6E9CDD23B15640E7913F5511&sap-ui-tech-hint=GUI", use_container_width=True)
+with col_link2:
+    st.link_button("🔗 F2343", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#InspectionLot-manage?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_19201756B9B8750EC90100FD1334A5C2&/?sap-iapp-state--history=TASD20D46VXMN1QWQH0AVM2NC96FFSHFFT7TUR454&sap-iapp-state=TASZMNRM9E42K8KG4ULCKZ58GY8NEJWG0PSWH1FEM", use_container_width=True)
+with col_link3:
+    st.link_button("🔗 ZPM005", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#ZTRXZ-OpenZPM005?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_2FDD0850CF5CD91079D518EB22DB174A&sap-ui-tech-hint=GUI", use_container_width=True)
+with col_link4:
+    st.link_button("🔗 IW32", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#MaintenanceOrder-change?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_FFEFAAD9B1F0F11F26745DF5FBA898FD&sap-ui-tech-hint=GUI", use_container_width=True)
+with col_link5:
+    st.link_button("🔗 IW31", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#MaintenanceOrder-create?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_2DD560D80CB0ED2C9E30CD12193D06DE&sap-ui-tech-hint=GUI", use_container_width=True)
+
+st.markdown("<hr style='border:1px solid #ddd; margin-top: 15px; margin-bottom: 20px;'>", unsafe_allow_html=True)
+
+# =========================================================
+# TABS (PESTAÑAS PRINCIPALES)
+# =========================================================
 st.markdown("<h3 style='color:#2F56A6;'>Selecciona el módulo a utilizar:</h3>", unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4 = st.tabs([
