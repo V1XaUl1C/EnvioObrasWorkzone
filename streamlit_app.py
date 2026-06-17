@@ -375,7 +375,9 @@ with tab1:
                 else:
                     contrato_id = ""
 
-                zona_id = "A" if "COLONIAL" in org_mantenimiento else ("B" if "PANAMERICANA" in org_mantenimiento else "")
+                # --- LÓGICA DE ZONA A/B/C ---
+                zona_id = "A" if "COLONIAL" in org_mantenimiento else ("B" if "PANAMERICANA" in org_mantenimiento else ("C" if "NORTE CHICO" in org_mantenimiento else ""))
+                
                 fecha_reserva = datetime.now().strftime("%d.%m.%Y")
                 emplazamiento = f"M-{alim}"
                 
@@ -583,7 +585,10 @@ with tab2:
         alim = get_val(df_guia, 'SED', params['sed'], 'ALIM')
         org_mant = str(get_val(df_guia, 'SED', params['sed'], 'ORGANIZACIÓN MANTENIMIENTO')).upper()
         contrato_final = get_val(df_datos, 'DISTRITO', params['distrito'], 'CONTRATO')
-        zona_final = "A" if "COLONIAL" in org_mant else ("B" if "PANAMERICANA" in org_mant else "")
+        
+        # --- LÓGICA DE ZONA A/B/C ---
+        zona_final = "A" if "COLONIAL" in org_mant else ("B" if "PANAMERICANA" in org_mant else ("C" if "NORTE CHICO" in org_mant else ""))
+        
         emplazamiento_final = f"M-{alim}" if alim else ""
         dias_sumar = 3 if params['plazo'] == "21" else (5 if params['plazo'] == "56" else (15 if params['plazo'] == "360" else 0))
         fecha_reserva_final = (datetime.now() + timedelta(days=dias_sumar)).strftime("%d.%m.%Y")
@@ -828,7 +833,10 @@ with tab3:
         alim = get_val(df_guia, 'SED', params['sed'], 'ALIM')
         org_mant = str(get_val(df_guia, 'SED', params['sed'], 'ORGANIZACIÓN MANTENIMIENTO')).upper()
         contrato_final = get_val(df_datos, 'DISTRITO', params['distrito'], 'CONTRATO')
-        zona_final = "A" if "COLONIAL" in org_mant else ("B" if "PANAMERICANA" in org_mant else "")
+        
+        # --- LÓGICA DE ZONA A/B/C ---
+        zona_final = "A" if "COLONIAL" in org_mant else ("B" if "PANAMERICANA" in org_mant else ("C" if "NORTE CHICO" in org_mant else ""))
+        
         emplazamiento_final = f"M-{alim}" if alim else ""
         dias_sumar = 3 if params['plazo'] == "21" else (5 if params['plazo'] == "56" else (15 if params['plazo'] == "360" else 0))
         fecha_reserva_final = (datetime.now() + timedelta(days=dias_sumar)).strftime("%d.%m.%Y")
