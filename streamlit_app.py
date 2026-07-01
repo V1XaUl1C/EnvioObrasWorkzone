@@ -981,10 +981,12 @@ with tab4:
                     ruta_temp = os.path.join(temp_dir, nuevo_nombre)
                     ruta_absoluta = os.path.abspath(ruta_temp)
 
+                    # Cambio aplicado aquí: Usamos getvalue()
                     with open(ruta_absoluta, "wb") as f:
-                        f.write(archivo.getbuffer())
+                        f.write(archivo.getvalue())
 
-                    os.chmod(ruta_absoluta, stat.S_IWRITE)
+                    # Cambio aplicado aquí: Comentamos os.chmod para evitar errores en Streamlit Cloud (Linux)
+                    # os.chmod(ruta_absoluta, stat.S_IWRITE)
 
                     if ext.lower() == '.docx':
                         procesar_word(ruta_absoluta, codigo_viejo, codigo_nuevo)
