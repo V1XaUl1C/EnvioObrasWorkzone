@@ -256,7 +256,7 @@ with col_link5:
     st.markdown("<p style='text-align:center; margin-bottom:5px; font-weight:bold; font-size:14px; color:#555;'>Crear ODM</p>", unsafe_allow_html=True)
     st.link_button("🔗 IW31", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#MaintenanceOrder-create?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_2DD560D80CB0ED2C9E30CD12193D06DE&sap-ui-tech-hint=GUI", use_container_width=True)
 with col_link6:
-    st.markdown("<p style='text-align:center; margin-bottom:5px; font-weight:bold; font-size:14px; color:#555;'>Crear ODM</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; margin-bottom:5px; font-weight:bold; font-size:14px; color:#555;'>Aprobar Pre Liquidación</p>", unsafe_allow_html=True)
     st.link_button("🔗 ZPM018", "https://pluz-peru-portal-prd.workzonehr.cfapps.br10.hana.ondemand.com/site#ZTRXZ-OpenZPM018?sap-app-origin-hint=&sap-ui-app-id-hint=s4hana_0FFCE884157885BB53E28AB3EE3EC905&sap-ui-tech-hint=GUI", use_container_width=True)
 
 st.markdown("<hr style='border:1px solid #ddd; margin-top: 15px; margin-bottom: 20px;'>", unsafe_allow_html=True)
